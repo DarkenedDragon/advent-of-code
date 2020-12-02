@@ -8,14 +8,16 @@ fn main() {
 
     let mut valid_1 = 0;
     let mut valid_2 = 0;
+    // Check each line
     for line in contents {
         if line.len() > 0 {
             // part one
+            // setup our variables
             let password_line = PasswordLine::new(line);
-            // Count how many of that letter are in the password
-            let mut num_of_letter = 0;
             let password = password_line.password;
             let range = password_line.range;
+            // Count how many of that letter are in the password
+            let mut num_of_letter = 0;
             for letter in password.chars() {
                 if letter == password_line.character {
                     num_of_letter += 1;
@@ -36,7 +38,8 @@ fn main() {
                 Some(a) => a,
                 None => '\0'
             };
-            // xor
+            // XOR: if either the first letter or second letter are in the right place
+            // but not both
             if (first_letter == password_line.character)
                 ^ (second_letter == password_line.character)  {
                 valid_2 += 1;
@@ -47,7 +50,8 @@ fn main() {
     println!("Part one has {} valid passwords", valid_1);
     println!("Part two has {} valid passwords", valid_2);
 }
-
+// helper struct
+// keeps things more orgainized
 struct PasswordLine<'a> {
     range: (u32, u32),
     character: char,
