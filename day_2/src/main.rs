@@ -6,7 +6,46 @@ fn main() {
     // Split into each line
     let contents = input.split("\n").collect::<Vec<&str>>();
 
+    let mut valid_1 = 0;
+    let mut valid_2 = 0;
+    for line in contents {
+        if line.len() > 0 {
+            // part one
+            let password_line = PasswordLine::new(line);
+            // Count how many of that letter are in the password
+            let mut num_of_letter = 0;
+            let password = password_line.password;
+            let range = password_line.range;
+            for letter in password.chars() {
+                if letter == password_line.character {
+                    num_of_letter += 1;
+                }
+            }
+            // if the number of letters in the password is within the range, add one
+            if num_of_letter >= password_line.range.0 && num_of_letter <= password_line.range.1 {
+                valid_1 += 1;
+            }
 
+            // check part 2
+            // ranges are 1 indexed
+            let first_letter = match password.chars().nth((range.0-1) as usize) {
+                Some(a) => a,
+                None => '\0'
+            };
+            let second_letter = match password.chars().nth((range.1-1) as usize) {
+                Some(a) => a,
+                None => '\0'
+            };
+            // xor
+            if (first_letter == password_line.character)
+                ^ (second_letter == password_line.character)  {
+                valid_2 += 1;
+            }
+        }
+
+    }
+    println!("Part one has {} valid passwords", valid_1);
+    println!("Part two has {} valid passwords", valid_2);
 }
 
 struct PasswordLine<'a> {
