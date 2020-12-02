@@ -4,7 +4,7 @@ fn main() {
     let filename = "input.txt";
 
     let contents = fs::read_to_string(filename).unwrap();
-    // converts the input into a vector of 16 bit integers
+    // converts the input into a vector of 32 bit integers
     let values = contents.split_ascii_whitespace().map(|val| val.parse().unwrap()).collect::<Vec<i32>>();
 
     // brute force method
