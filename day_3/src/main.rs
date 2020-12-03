@@ -7,6 +7,7 @@ fn main() {
     let slopes = vec![(1, 1), (3, 1), (5, 1), (7, 1), (1, 2)];
     let mut runs : Vec<u32> = Vec::new();
 
+    // Run down each slope
     for slope in slopes {
         let mut trees = 0;
         let mut pos = 0;
@@ -30,6 +31,7 @@ fn main() {
         runs.push(trees);
     }
 
+    // Find their product
     let mut product: u32 = 1;
     for run in runs {
         product *= run;
