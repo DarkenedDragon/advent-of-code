@@ -3,38 +3,157 @@ use std::collections::HashMap;
 use regex::Regex;
 
 fn main() {
-    let input = fs::read_to_string("test.txt").expect("Failed to read input file");
+    let input = fs::read_to_string("input4.txt").expect("Failed to read input file");
+
     // Can't seem to get this to split the paragraphs
-    let reg = Regex::new(r"\w\n").unwrap();
-    let passports = reg
-        .split(&input)
+    let passports = input
+        .split("\n\n")
+        //.split("\r\n\r\n")
         .map(|s| Passport::new(s))
         .collect::<Vec<Passport>>()
         ;
 
-    let test = input.split("\n\n").collect::<Vec<&str>>();
-    println!("Test len: {}", test.len());
-
     println!("There are {} passports", passports.len());
 
-    let required_fields = vec!["byr", "iry", "eyr", "hgt", "hcl", "ecl", "pid"];
+    let required_fields = vec!["byr", "iyr", "eyr", "hgt", "hcl", "ecl", "pid"];
     let mut num_valid = 0;
     for passport in passports {
-        println!("{}", passport.entry);
-        println!("Key : Pair");
-        for key in passport.map.keys() {
-            println!("{} : {}", key, passport.map.get(key).unwrap());
-        }
-
         // Check that it has all the valid fields
         let mut valid = true;
-        for field in &required_fields {
-            if !passport.map.contains_key(field) {
-                valid = false;
+
+        // byr validation
+        let mut byr = true;
+        match passport.map.get("byr") {
+            Some(val) => {
+                let num = val.parse::<i32>().unwrap();
+                if !(val.len() == 4 && num >= 1920 && num <= 2002) {
+                    byr = false;
+                }
+            }
+            None => {
+                byr = false;
             }
         }
 
-        if valid {
+        // iry validation
+        let mut iyr = true;
+        match passport.map.get("iyr") {
+            Some(val) => {
+                let num = val.parse::<i32>().unwrap();
+                if !(val.len() == 4 && num >= 2010 && num <= 2020) {
+                    iyr = false;
+                }
+            }
+            None => {
+                iyr = false;
+            }
+        }
+
+        // eyr validation
+        let mut eyr = true;
+        match passport.map.get("eyr") {
+            Some(val) => {
+                let num = val.parse::<i32>().unwrap();
+                if !(val.len() == 4 && num >= 2020 && num <= 2030) {
+                    eyr = false;
+                }
+            }
+            None => {
+                eyr = false;
+            }
+        }
+
+        // hgt validation
+        let mut hgt = true;
+        match passport.map.get("hgt") {
+            Some(val) => {
+
+                let unit = &val[(val.len()-2)..];
+                // make sure that if there isn't a unit we don't mess up
+                let num = match val[0..(val.len()-2)].parse::<i32>() {
+                    Ok(n) => n,
+                    Err(_) => -1
+                };
+
+                match unit {
+                    "in" => {
+                        if !(num >= 59 && num <= 76) {
+                            hgt = false;
+                        }
+                    }
+                    "cm" => {
+                        if !(num >= 150 && num <= 193) {
+                            hgt = false;
+                        }
+                    }
+                    _ => {
+                        hgt = false;
+                    }
+                }
+
+            }
+            None => {
+                hgt = false;
+            }
+        }
+
+        // hcl validation
+        let mut hcl = true;
+        match passport.map.get("hcl") {
+            Some(val) => {
+                let re = Regex::new(r"^#[a-z0-9]{6}$").expect("Failed to generate regex");
+                if !re.is_match(val) {
+                    hcl = false;
+                }
+            }
+            None => {
+                hcl = false;
+            }
+        }
+
+        // ecl validation
+        let mut ecl = true;
+        match passport.map.get("ecl") {
+            Some(val) => {
+                if !(*val == "amb" || *val == "blu" || *val == "brn" || *val == "gry" ||
+                    *val == "grn" || *val == "hzl" || *val == "oth") {
+                    ecl = false;
+                }
+            }
+            None => {
+                ecl = false;
+            }
+        }
+
+        // pid validation
+        let mut pid = true;
+        match passport.map.get("pid") {
+            Some(val) => {
+                let re = Regex::new(r"^\d{9}$").expect("Failed to generate regex");
+                if !re.is_match(val) {
+                    pid = false;
+                }
+            }
+            None => {
+                pid = false;
+            }
+        }
+
+        /*
+        // Debug
+        println!("Validations");
+        println!("-----------");
+        println!("byr : {}", byr);
+        println!("iyr : {}", iyr);
+        println!("eyr : {}", eyr);
+        println!("hgt : {}", hgt);
+        println!("hcl : {}", hcl);
+        println!("ecl : {}", ecl);
+        println!("pid : {}", pid);
+        */
+
+        // If everything passed, then this passport was valid
+        if byr && iyr && eyr && hgt && hcl && ecl && pid {
             num_valid += 1;
         }
     }
@@ -44,7 +163,7 @@ fn main() {
 }
 
 struct Passport<'a> {
-    entry: &'a str,
+    _entry: &'a str,
     map: HashMap<&'a str, &'a str>
 }
 
@@ -61,6 +180,6 @@ impl<'a> Passport<'a> {
             map.insert(key_pair.0, key_pair.1);
         }
 
-        return Passport {entry: input, map};
+        return Passport {_entry: input, map};
     }
 }
