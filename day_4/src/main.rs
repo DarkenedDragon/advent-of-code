@@ -15,11 +15,9 @@ fn main() {
 
     println!("There are {} passports", passports.len());
 
-    let required_fields = vec!["byr", "iyr", "eyr", "hgt", "hcl", "ecl", "pid"];
     let mut num_valid = 0;
     for passport in passports {
         // Check that it has all the valid fields
-        let mut valid = true;
 
         // byr validation
         let mut byr = true;
