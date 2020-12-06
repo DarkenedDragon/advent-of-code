@@ -5,18 +5,15 @@ fn main() {
     let input = fs::read_to_string("input6.txt").expect("Failed to read input file");
     let groups = input
         .split("\n\n")
-        //.split("\r\n\r\n")
+        //.split("\r\n\r\n") // use for test file
         .map(|val| Group::new(val))
         .collect::<Vec<Group>>();
 
     let mut total_q_ans = 0;
     let mut total_ev_ans = 0;
     for group in groups {
-        //println!("size: {}, answers: {}", group.size, group.answers.keys().len());
         total_q_ans += group.answers.keys().len();
-        println!("Size: {}, Answers", group.size);
         for ans in group.answers {
-            println!("{}, {}", ans.0, ans.1);
             if ans.1 == group.size {
                 total_ev_ans +=1;
             }
@@ -28,6 +25,7 @@ fn main() {
 
 }
 
+// Struct to keep relevant data together
 struct Group {
     answers: HashMap<char, i32>,
     size: i32
