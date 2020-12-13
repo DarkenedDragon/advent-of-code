@@ -2,17 +2,19 @@
 // stores an adjaceny list of nodes
 // This is a directed graph
 pub mod graph {
-    use std::collections::{HashMap};
+    use std::collections::{HashMap, VecDeque};
     use std::collections::hash_map::Entry;
+    use std::borrow::Borrow;
 
     #[derive(Debug)]
     pub struct Graph {
         adj_list: HashMap<String, Vec<Edge>>
     }
 
+    #[derive(Debug)]
     pub struct Edge {
-        node: String,
-        weight: i32
+        pub node: String,
+        pub weight: i32
     }
 
     impl PartialEq for Edge {
@@ -49,7 +51,7 @@ pub mod graph {
             let mut out = false;
             // Add node2 to the graph if not already present
             if !self.adj_list.contains_key(&node2) {
-                out = match self.adj_list.insert(node2, Vec::new()) {
+                out = match self.adj_list.insert(node2.to_owned(), Vec::new()) {
                     Some(_t) => false,
                     None => true
                 };
@@ -78,7 +80,7 @@ pub mod graph {
             // Get rid of the node in every other nodes list
             for key in self.adj_list.iter_mut() {
                 // Remove the value in the list
-                if let Some(pos) = key.1.iter().position(|val| *val.node == node) {
+                if let Some(pos) = key.1.iter().position(|val| val.node == node) {
                     key.1.remove(pos) ;
                     out = true;
                 }
@@ -92,7 +94,7 @@ pub mod graph {
             let mut out = false;
 
             if let Some(val) = self.adj_list.get_mut(node1) {
-                if let Some(pos) = val.iter().position(|val| *val.node == node2) {
+                if let Some(pos) = val.iter().position(|val| val.node == node2) {
                     val.remove(pos);
                     out = true;
                 }
@@ -104,6 +106,38 @@ pub mod graph {
         // Get the adjacent nodes
         pub fn get_adjacent(&self, node: &str) -> Option<&Vec<Edge>> {
             return self.adj_list.get(node);
+        }
+    }
+
+    // performs a BFS and calls the provided lambda at each node traversed
+    pub fn breadth_first_search<F>(graph: Graph, start: &str, mut action: F) where F: FnMut(&str) {
+        // BFS
+        let mut queue :VecDeque<&str>= VecDeque::new();
+        let mut checked: HashMap<&str, bool> = HashMap::new();
+        queue.push_front(start);
+        checked.insert(start, false);
+
+        while !queue.is_empty() {
+            if let Some(current) = queue.pop_back() {
+                // Check that we haven't already covered this node
+                if let Entry::Occupied(mut ocp) = checked.entry(current) {
+                    if *ocp.get() == false {
+                        *ocp.get_mut() = true;
+                        // Add the others
+                        if let Some(adj) = graph.get_adjacent(current) {
+                            for node in adj {
+                                queue.push_front(&node.node);
+                                // super hacky. Don't know why contains_key won't take a &str straight up
+                                if !checked.contains_key(&node.node.borrow()) {
+                                    checked.insert(&node.node, false);
+                                }
+                            }
+                        }
+                        // Do the thing
+                        action(current);
+                    }
+                }
+            }
         }
     }
 }
