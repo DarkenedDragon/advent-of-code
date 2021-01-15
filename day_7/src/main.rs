@@ -38,11 +38,9 @@ fn main() {
 
 
     let mut count = -1;
-    let mut total = 0;
     let start = "shiny gold";
     // Experiments with closures
-    breadth_first_search(graph_prt_1, start, |current| count+=1);
-    breadth_first_search(graph_prt_2, start, |current| )
+    breadth_first_search(graph_prt_1, start, |_| count+=1);
 
     println!("There are {} colors contained in {}", count, start);
 
